@@ -1,0 +1,83 @@
+#define metalSensor A0
+
+#define trigPin 5
+#define echoPin 6
+
+#define motorIN1 7
+#define motorIN2 8
+#define enablePin 5
+
+long duration;
+float distance;
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(metalSensor, INPUT);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  pinMode(motorIN1, OUTPUT);
+  pinMode(motorIN2, OUTPUT);
+  pinMode(enablePin, OUTPUT);
+}
+
+void loop() {
+  int metalValue = analogRead(metalSensor);
+  distance = getDistance();
+
+  Serial.print("Metal Value: ");
+  Serial.print(metalValue);
+  Serial.print(" | Distance: ");
+  Serial.println(distance);
+
+  if (metalValue > 500) {
+    Serial.println("Metal Detected");
+  }
+
+  if (distance >= 2 && distance <= 10) {
+    Serial.println("Motor Activated");
+    
+    // Move Forward
+    rotateMotorForward();
+    delay(420);  // Adjust for desired rotation
+    
+    // Move Backward
+    rotateMotorBackward();
+    delay(420);  // Adjust for desired rotation
+
+    // Stop Motor
+    stopMotor();
+  }
+  
+  delay(300);  // Stability Delay
+}
+
+float getDistance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH);
+  return duration * 0.034 / 2;
+}
+
+void rotateMotorForward() {
+  digitalWrite(motorIN1, HIGH);
+  digitalWrite(motorIN2, LOW);
+  analogWrite(enablePin, 200);
+}
+
+void rotateMotorBackward() {
+  digitalWrite(motorIN1, LOW);
+  digitalWrite(motorIN2, HIGH);
+  analogWrite(enablePin, 200);
+}
+
+void stopMotor() {
+  digitalWrite(motorIN1, LOW);
+  digitalWrite(motorIN2, LOW);
+}
